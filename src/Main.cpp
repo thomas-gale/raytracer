@@ -1,18 +1,37 @@
+#include <Corrade/Containers/GrowableArray.h>
 #include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
+#include <Magnum/GL/Texture.h>
+#include <Magnum/GL/TextureFormat.h>
+//#include <Magnum/Image.h>
+#include <Magnum/ImageView.h>
 #include <Magnum/Math/Color.h>
+#include <Magnum/Math/Matrix3.h>
 #include <Magnum/Math/Matrix4.h>
+#include <Magnum/Math/Vector2.h>
+#include <Magnum/MeshTools/Compile.h>
 #include <Magnum/MeshTools/CompressIndices.h>
 #include <Magnum/MeshTools/Interleave.h>
+#include <Magnum/PixelFormat.h>
 #include <Magnum/Platform/Sdl2Application.h>
-#include <Magnum/Primitives/Cube.h>
+#include <Magnum/Primitives/Square.h>
+#include <Magnum/Shaders/Flat.h>
 #include <Magnum/Shaders/Phong.h>
+#include <Magnum/Trade/ImageData.h>
 #include <Magnum/Trade/MeshData.h>
+
+#include <SDL2/SDL.h>
 
 using namespace Magnum;
 using namespace Magnum::Math::Literals;
+
+struct Vertex {
+  Vector3 position;
+  Vector2 textureCoordinates;
+  Vertex(Vector3 pos, Vector2 tex) : position(pos), textureCoordinates(tex){};
+};
 
 class Raytrace : public Platform::Application {
 public:
@@ -21,56 +40,56 @@ public:
 private:
   void drawEvent() override;
 
-  GL::Mesh _mesh;
-  Shaders::Phong _shader;
+  // Trade::ImageData2D image_{NoCreate};
+  // Vector2i imageSize_;
+  // GL::Texture2D texture_;
 
-  Matrix4 _transformation, _projection;
-  Color3 _color;
+  Vertex data_[4]{Vertex(Vector3(0.0, 0.0, 0.0), Vector2(0.0, 0.0)),
+                  Vertex(Vector3(1.0, 0.0, 0.0), Vector2(1.0, 0.0)),
+                  Vertex(Vector3(1.0, 1.0, 0.0), Vector2(1.0, 1.0)),
+                  Vertex(Vector3(0.0, 1.0, 0.0), Vector2(0.0, 1.0))};
+
+  GL::Buffer vertices_;
+
+  GL::Mesh mesh_{NoCreate};
+  // Shaders::Flat2D shader_{Shaders::Flat2D::Flag::Textured |
+  //                        Shaders::Flat2D::Flag::TextureTransformation};
 };
 
 Raytrace::Raytrace(const Arguments &arguments)
-    : Platform::Application{
-          arguments, Configuration{}.setTitle("Raytrace")} {
-  GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
-  GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
+    : Platform::Application{arguments, Configuration{}.setTitle("Raytrace")} {
 
-  Trade::MeshData cube = Primitives::cubeSolid();
+  vertices_.setData(data_, GL::BufferUsage::StaticDraw);
 
-  GL::Buffer vertices;
-  vertices.setData(
-      MeshTools::interleave(cube.positions3DAsArray(), cube.normalsAsArray()));
+  mesh_ = MeshTools::compile(
+      Primitives::squareSolid(Primitives::SquareFlag::TextureCoordinates));
 
-  std::pair<Containers::Array<char>, MeshIndexType> compressed =
-      MeshTools::compressIndices(cube.indicesAsArray());
-  GL::Buffer indices;
-  indices.setData(compressed.first);
-
-  _mesh.setPrimitive(cube.primitive())
-      .setCount(cube.indexCount())
-      .addVertexBuffer(std::move(vertices), 0, Shaders::Phong::Position{},
-                       Shaders::Phong::Normal{})
-      .setIndexBuffer(std::move(indices), 0, compressed.second);
-
-  _transformation =
-      Matrix4::rotationX(30.0_degf) * Matrix4::rotationY(40.0_degf);
-  _projection =
-      Matrix4::perspectiveProjection(
-          35.0_degf, Vector2{windowSize()}.aspectRatio(), 0.01f, 100.0f) *
-      Matrix4::translation(Vector3::zAxis(-10.0f));
-  _color = Color3::fromHsv({35.0_degf, 1.0f, 1.0f});
+  mesh_.addVertexBuffer(vertices_, 0, Shaders::Flat2D::Position{}, Shaders::Flat2D::TextureCoordinates{});
 }
 
 void Raytrace::drawEvent() {
-  GL::defaultFramebuffer.clear(GL::FramebufferClear::Color |
-                               GL::FramebufferClear::Depth);
+  GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
 
-  _shader.setLightPositions({{7.0f, 5.0f, 2.5f, 0.0f}})
-      .setDiffuseColor(_color)
-      .setAmbientColor(Color3::fromHsv({_color.hue(), 1.0f, 0.3f}))
-      .setTransformationMatrix(_transformation)
-      .setNormalMatrix(_transformation.normalMatrix())
-      .setProjectionMatrix(_projection)
-      .draw(_mesh);
+  Matrix4 transformationMatrix, projectionMatrix;
+
+  Containers::Array<char> data;
+  Containers::arrayResize(data, 32 * 32 * 3);
+  for (int i = 0; i < 32 * 32 * 3; ++i) {
+    data[i] = 64;
+  }
+
+  auto image = Containers::Pointer<Trade::ImageData2D>(new Trade::ImageData2D{
+      PixelFormat::RGB8Unorm, {32, 32}, std::move(data)});
+
+  GL::Texture2D texture;
+  texture.setSubImage(0, {}, *image);
+
+  Shaders::Flat3D shader{Shaders::Flat3D::Flag::Textured};
+  shader
+      .setTransformationProjectionMatrix(projectionMatrix *
+                                         transformationMatrix)
+      .bindTexture(texture)
+      .draw(mesh_);
 
   swapBuffers();
 }
