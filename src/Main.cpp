@@ -1,6 +1,7 @@
 #include <Corrade/Containers/GrowableArray.h>
 #include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/GL/Framebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Texture.h>
@@ -16,7 +17,7 @@
 #include <Magnum/MeshTools/Interleave.h>
 #include <Magnum/PixelFormat.h>
 #include <Magnum/Platform/Sdl2Application.h>
-#include <Magnum/Primitives/Square.h>
+#include <Magnum/Primitives/Plane.h>
 #include <Magnum/Shaders/Flat.h>
 #include <Magnum/Shaders/Phong.h>
 #include <Magnum/Trade/ImageData.h>
@@ -28,9 +29,9 @@ using namespace Magnum;
 using namespace Magnum::Math::Literals;
 
 struct Vertex {
-  Vector3 position;
+  Vector2 position;
   Vector2 textureCoordinates;
-  Vertex(Vector3 pos, Vector2 tex) : position(pos), textureCoordinates(tex){};
+  Vertex(Vector2 pos, Vector2 tex) : position(pos), textureCoordinates(tex){};
 };
 
 class Raytrace : public Platform::Application {
@@ -44,16 +45,20 @@ private:
   // Vector2i imageSize_;
   // GL::Texture2D texture_;
 
-  Vertex data_[4]{Vertex(Vector3(0.0, 0.0, 0.0), Vector2(0.0, 0.0)),
-                  Vertex(Vector3(1.0, 0.0, 0.0), Vector2(1.0, 0.0)),
-                  Vertex(Vector3(1.0, 1.0, 0.0), Vector2(1.0, 1.0)),
-                  Vertex(Vector3(0.0, 1.0, 0.0), Vector2(0.0, 1.0))};
+  Vertex data_[4]{Vertex(Vector2(-0.9, -0.9), Vector2(0.0, 0.0)),
+                  Vertex(Vector2(0.9, -0.9), Vector2(1.0, 0.0)),
+                  Vertex(Vector2(-0.9, 0.9), Vector2(0.0, 1.0)),
+                  Vertex(Vector2(0.9, 0.9), Vector2(1.0, 1.0))};
 
   GL::Buffer vertices_;
-
   GL::Mesh mesh_{NoCreate};
-  // Shaders::Flat2D shader_{Shaders::Flat2D::Flag::Textured |
-  //                        Shaders::Flat2D::Flag::TextureTransformation};
+
+  Matrix4 transformationMatrix_, projectionMatrix_;
+
+  Corrade::Containers::Pointer<Magnum::Trade::ImageData2D> image_;
+  GL::Texture2D texture_;
+
+  Shaders::Flat2D shader_{Shaders::Flat3D::Flag::Textured};
 };
 
 Raytrace::Raytrace(const Arguments &arguments)
@@ -62,33 +67,31 @@ Raytrace::Raytrace(const Arguments &arguments)
   vertices_.setData(data_, GL::BufferUsage::StaticDraw);
 
   mesh_ = MeshTools::compile(
-      Primitives::squareSolid(Primitives::SquareFlag::TextureCoordinates));
+      Primitives::planeSolid(Primitives::PlaneFlag::TextureCoordinates));
 
-  mesh_.addVertexBuffer(vertices_, 0, Shaders::Flat2D::Position{}, Shaders::Flat2D::TextureCoordinates{});
+  mesh_.setCount(4).addVertexBuffer(vertices_, 0, Shaders::Flat2D::Position{},
+                                    Shaders::Flat2D::TextureCoordinates{});
+
+  Containers::Array<char> data;
+  Containers::arrayResize(data, 32 * 32 * 3);
+  for (int i = 0; i < 32 * 32 * 3; ++i) {
+    data[i] = 250;
+  }
+
+  image_ = Containers::Pointer<Trade::ImageData2D>(new Trade::ImageData2D{
+      PixelFormat::RGB8Unorm, {32, 32}, std::move(data)});
+
+  texture_.setSubImage(0, {}, *image_);
 }
 
 void Raytrace::drawEvent() {
   GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
 
-  Matrix4 transformationMatrix, projectionMatrix;
-
-  Containers::Array<char> data;
-  Containers::arrayResize(data, 32 * 32 * 3);
-  for (int i = 0; i < 32 * 32 * 3; ++i) {
-    data[i] = 64;
-  }
-
-  auto image = Containers::Pointer<Trade::ImageData2D>(new Trade::ImageData2D{
-      PixelFormat::RGB8Unorm, {32, 32}, std::move(data)});
-
-  GL::Texture2D texture;
-  texture.setSubImage(0, {}, *image);
-
-  Shaders::Flat3D shader{Shaders::Flat3D::Flag::Textured};
-  shader
-      .setTransformationProjectionMatrix(projectionMatrix *
-                                         transformationMatrix)
-      .bindTexture(texture)
+  shader_
+      //.setColor(Color4(100.0, 100.0, 100.0, 0.0))
+      //.setTransformationProjectionMatrix(projectionMatrix_ *
+      //                                   transformationMatrix_)
+      .bindTexture(texture_)
       .draw(mesh_);
 
   swapBuffers();
