@@ -30,29 +30,6 @@
 using namespace Magnum;
 using namespace Magnum::Math::Literals;
 
-class FlatSurfaceShader : public GL::AbstractShaderProgram {
-public:
-  typedef GL::Attribute<0, Vector2> Position;
-  typedef GL::Attribute<1, Vector2> TextureCoordinates;
-
-  explicit FlatSurfaceShader() {};
-
-  FlatSurfaceShader &setColor(const Color3 &color) {
-    setUniform(_colorUniform, color);
-    return *this;
-  }
-
-  FlatSurfaceShader &bindTexture(GL::Texture2D &texture) {
-    texture.bind(TextureUnit);
-    return *this;
-  }
-
-private:
-  enum : Int { TextureUnit = 0 };
-
-  Int _colorUniform;
-};
-
 class Raytrace : public Platform::Application {
 public:
   explicit Raytrace(const Arguments &arguments);
@@ -61,31 +38,8 @@ private:
   void drawEvent() override;
 
   GL::Mesh mesh_;
-  //FlatSurfaceShader shader_;
   Shaders::Flat2D shader_{Shaders::Flat3D::Flag::Textured};
   GL::Texture2D texture_;
-
-  // Trade::ImageData2D image_{NoCreate};
-  // Vector2i imageSize_;
-  // GL::Texture2D texture_;
-
-  // Vertex data_[4]{Vertex(Vector2(-0.9, -0.9), Vector2(0.0, 0.0)),
-  //                Vertex(Vector2(0.9, -0.9), Vector2(1.0, 0.0)),
-  //                Vertex(Vector2(-0.9, 0.9), Vector2(0.0, 1.0)),
-  //                Vertex(Vector2(0.9, 0.9), Vector2(1.0, 1.0))};
-
-  // GL::Buffer vertices_;
-  // GL::Mesh mesh_{NoCreate};
-
-  // Matrix4 transformationMatrix_, projectionMatrix_;
-
-  // Corrade::Containers::Pointer<Magnum::Trade::ImageData2D> image_;
-  // GL::Texture2D texture_;
-
-  // Shaders::Flat2D shader_{Shaders::Flat3D::Flag::Textured};
-  // Shaders::Flat2D shader_;
-
-  // float dym_ = -1.0;
 };
 
 Raytrace::Raytrace(const Arguments &arguments)
@@ -108,14 +62,6 @@ Raytrace::Raytrace(const Arguments &arguments)
   mesh_.setCount(3).addVertexBuffer(std::move(buffer), 0,
                                     Shaders::Flat2D::Position{},
                                     Shaders::Flat2D::TextureCoordinates{});
-
-  /*vertices_.setData(data_, GL::BufferUsage::StaticDraw);
-
-  mesh_ = MeshTools::compile(
-      Primitives::planeSolid(Primitives::PlaneFlag::TextureCoordinates));
-
-  mesh_.addVertexBuffer(vertices_, 0, Shaders::Flat2D::Position{},
-                        Shaders::Flat2D::TextureCoordinates{});*/
 
   const int imSize = 128;
   Containers::Array<char> imdata;
