@@ -48,18 +48,22 @@ Raytrace::Raytrace(const Arguments &arguments)
   struct FlatVertex {
     Vector2 position;
     Vector2 textureCoordinates;
-    //FlatVertex(Vector2 pos, Vector2 tex) : position(pos), textureCoordinates(tex){};
   };
 
+  // Simple Quad.
   const FlatVertex data[]{
-      {{-0.5f, -0.5f}, {0.0f, 0.0f}}, /* Left position and texture coordinate */
-      {{0.5f, -0.5f}, {1.0f, 0.0f}}, /* Right position and texture coordinate */
-      {{0.5f, 0.5f}, {0.5f, 1.0f}}   /* Top position and texture coordinate */
+      {{-0.9f, -0.9f}, {0.0f, 0.0f}}, /* Bottom Left position and texture coordinate */
+      {{0.9f, -0.9f}, {1.0f, 0.0f}}, /* Bottom Right position and texture coordinate */
+      {{0.9f, 0.9f}, {1.0f, 1.0f}},  /* Top Right position and texture coordinate */
+      {{-0.9f, 0.9f}, {1.0f, 0.0f}},   /* Top Left position and texture coordinate */
+      {{-0.9f, -0.9f}, {0.0f, 0.0f}}, /* Bottom Left position and texture coordinate */
+      {{0.9f, 0.9f}, {1.0f, 1.0f}},  /* Top Right position and texture coordinate */
+      {{-0.9f, 0.9f}, {1.0f, 0.0f}}   /* Top Left position and texture coordinate */
   };
 
   GL::Buffer buffer;
   buffer.setData(data);
-  mesh_.setCount(3).addVertexBuffer(std::move(buffer), 0,
+  mesh_.setCount(6).addVertexBuffer(std::move(buffer), 0,
                                     Shaders::Flat2D::Position{},
                                     Shaders::Flat2D::TextureCoordinates{});
 
@@ -67,7 +71,7 @@ Raytrace::Raytrace(const Arguments &arguments)
   Containers::Array<char> imdata;
   Containers::arrayResize(imdata, imSize * imSize * 3);
   for (int i = 0; i < imSize * imSize * 3; ++i) {
-    imdata[i] = 255;
+    imdata[i] = 142;
   }
 
   auto image = Containers::Pointer<Trade::ImageData2D>(new Trade::ImageData2D{
