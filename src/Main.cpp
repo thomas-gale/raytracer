@@ -70,8 +70,10 @@ Raytrace::Raytrace(const Arguments &arguments)
   const int imSize = 128;
   Containers::Array<char> imdata;
   Containers::arrayResize(imdata, imSize * imSize * 3);
-  for (int i = 0; i < imSize * imSize * 3; ++i) {
+  for (int i = 0; i < imSize * imSize * 3; i+=3) {
     imdata[i] = 142;
+    imdata[i+1] = 0;
+    imdata[i+2] = 0;
   }
 
   auto image = Containers::Pointer<Trade::ImageData2D>(new Trade::ImageData2D{
