@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/src/raytrace",
+            "program": "${workspaceFolder}/build/Debug/bin/raytrace",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

@@ -1,6 +1,4 @@
-# -- GLFW -- (Simple window/context/input handling wrapper aroud OpenGL and Vulkan etc.)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(WITH_SDL2APPLICATION ON CACHE BOOL "" FORCE)
 
-add_subdirectory(glfw)
+add_subdirectory(corrade EXCLUDE_FROM_ALL)
+add_subdirectory(magnum EXCLUDE_FROM_ALL)
