@@ -2,7 +2,10 @@
 
 #include <SDL.h>
 
+#include "Color.hpp"
 #include "Vec3.hpp"
+
+using namespace raytrace;
 
 int main() {
     std::cout << "Hello Raytrace" << std::endl;
@@ -55,19 +58,13 @@ int main() {
             auto g = double(height - y) / double(height);
             auto b = 0.25;
 
-            Uint32 ir = static_cast<Uint8>(255.999 * r);
-            Uint32 ig = static_cast<Uint8>(255.999 * g);
-            Uint32 ib = static_cast<Uint8>(255.999 * b);
-
             // Grab the pixel pointer
             Uint8* pixel = (Uint8*)surface->pixels;
             pixel += (y * surface->pitch) + (x * sizeof(Uint32));
 
             // Compose and set the color
-            ir <<= 16;
-            ig <<= 8;
-            Uint32 c = ir | ig | ib;
-            *((Uint32*)pixel) = c;
+            Uint32 c = convertColor(Color<double>(r, g, b));
+             *((Uint32*)pixel) = c;
         }
     }
 
