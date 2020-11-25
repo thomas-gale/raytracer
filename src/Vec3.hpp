@@ -4,6 +4,8 @@
 #include <cmath>
 #include <iostream>
 
+namespace raytrace {
+
 template <class T> class Vec3 {
   public:
     Vec3() : e{0.0, 0.0, 0.0} {}
@@ -78,5 +80,12 @@ template <class T> class Vec3 {
   private:
     T e[3];
 };
+
+// Useful alises
+
+template <class T> using Point3 = Vec3<T>;
+template <class T> using Color = Vec3<T>;
+
+} // namespace raytrace
 
 #endif // VEC3_H
