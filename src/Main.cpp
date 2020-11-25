@@ -16,7 +16,7 @@ int main() {
   }
 
   // Open a window
-  SDL_Window *win = SDL_CreateWindow("Hello World!", 100, 100, width, height,
+  SDL_Window *win = SDL_CreateWindow("Hello World!", 1200, 100, width, height,
                                      SDL_WINDOW_SHOWN);
   if (win == nullptr) {
     std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
@@ -42,11 +42,27 @@ int main() {
 
   // Set fixed colour (white)
   Uint32 color = 0x00FF00;
-  for (int x = 0; x < width; ++x) {
-    for (int y = 0; y < height; ++y) {
+  for (int y = 0; y < height; ++y) {
+    std::cerr << "\rScanlines remaining: " << y << " " << std::flush;
+    for (int x = 0; x < width; ++x) {
+      // Compute color
+      auto r = double(x) / double(width);
+      auto g = double(y) / double(height);
+      auto b = 0.25;
+
+      Uint32 ir = static_cast<Uint8>(255.999 * r);
+      Uint32 ig = static_cast<Uint8>(255.999 * g);
+      Uint32 ib = static_cast<Uint8>(255.999 * b);
+
+      // Grab the pixel pointer
       Uint8 *pixel = (Uint8 *)surface->pixels;
       pixel += (y * surface->pitch) + (x * sizeof(Uint32));
-      *((Uint32 *)pixel) = color;
+
+      // Compose and set the color
+      ir <<= 16;
+      ig <<= 8;
+      Uint32 c = ir | ig | ib;
+      *((Uint32 *)pixel) = c;
     }
   }
 
