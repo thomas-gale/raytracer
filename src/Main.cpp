@@ -43,11 +43,11 @@ int main() {
   // Set fixed colour (white)
   Uint32 color = 0x00FF00;
   for (int y = 0; y < height; ++y) {
-    std::cerr << "\rScanlines remaining: " << y << " " << std::flush;
+    std::cerr << "\rScanlines remaining: " << height - y - 1 << " " << std::flush;
     for (int x = 0; x < width; ++x) {
       // Compute color
       auto r = double(x) / double(width);
-      auto g = double(y) / double(height);
+      auto g = double(height-y) / double(height);
       auto b = 0.25;
 
       Uint32 ir = static_cast<Uint8>(255.999 * r);
