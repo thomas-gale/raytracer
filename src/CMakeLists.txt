@@ -1,21 +1,10 @@
+find_package(SDL2 REQUIRED)
+
 add_executable(raytrace
     Main.cpp)
 
-find_package(Corrade REQUIRED 
-    Main)
+target_include_directories(raytrace PUBLIC
+    ${SDL2_INCLUDE_DIRS})
 
-find_package(Magnum REQUIRED 
-    GL
-    MeshTools
-    Primitives
-    Shaders
-    Sdl2Application)
-
-target_link_libraries(raytrace
-    Corrade::Main
-    Magnum::Application
-    Magnum::GL
-    Magnum::Magnum
-    Magnum::MeshTools
-    Magnum::Primitives
-    Magnum::Shaders)
+target_link_libraries(raytrace PUBLIC
+    ${SDL2_LIBRARIES})

@@ -1,98 +1,90 @@
-#include <Corrade/Containers/GrowableArray.h>
-#include <Magnum/GL/AbstractShaderProgram.h>
-#include <Magnum/GL/Buffer.h>
-#include <Magnum/GL/BufferImage.h>
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/Framebuffer.h>
-#include <Magnum/GL/Mesh.h>
-#include <Magnum/GL/Renderer.h>
-#include <Magnum/GL/Texture.h>
-#include <Magnum/GL/TextureFormat.h>
-//#include <Magnum/Image.h>
-#include <Magnum/ImageView.h>
-#include <Magnum/Math/Color.h>
-#include <Magnum/Math/Matrix3.h>
-#include <Magnum/Math/Matrix4.h>
-#include <Magnum/Math/Vector2.h>
-#include <Magnum/MeshTools/Compile.h>
-#include <Magnum/MeshTools/CompressIndices.h>
-#include <Magnum/MeshTools/Interleave.h>
-#include <Magnum/PixelFormat.h>
-#include <Magnum/Platform/Sdl2Application.h>
-#include <Magnum/Primitives/Plane.h>
-#include <Magnum/Shaders/Flat.h>
-#include <Magnum/Shaders/Phong.h>
-#include <Magnum/Trade/ImageData.h>
-#include <Magnum/Trade/MeshData.h>
+#include <iostream>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
-using namespace Magnum;
-using namespace Magnum::Math::Literals;
+int main() {
+  std::cout << "Hello Raytrace" << std::endl;
 
-class Raytrace : public Platform::Application {
-public:
-  explicit Raytrace(const Arguments &arguments);
+  // Settings.
+  int width = 640;
+  int height = 480;
 
-private:
-  void drawEvent() override;
-
-  GL::Mesh mesh_;
-  Shaders::Flat2D shader_{Shaders::Flat3D::Flag::Textured};
-  GL::Texture2D texture_;
-};
-
-Raytrace::Raytrace(const Arguments &arguments)
-    : Platform::Application{arguments, Configuration{}.setTitle("Raytrace")} {
-
-  struct FlatVertex {
-    Vector2 position;
-    Vector2 textureCoordinates;
-  };
-
-  // Simple Quad.
-  const FlatVertex data[]{
-      {{-0.9f, -0.9f}, {0.0f, 0.0f}}, /* Bottom Left position and texture coordinate */
-      {{0.9f, -0.9f}, {1.0f, 0.0f}}, /* Bottom Right position and texture coordinate */
-      {{0.9f, 0.9f}, {1.0f, 1.0f}},  /* Top Right position and texture coordinate */
-      {{-0.9f, 0.9f}, {1.0f, 0.0f}},   /* Top Left position and texture coordinate */
-      {{-0.9f, -0.9f}, {0.0f, 0.0f}}, /* Bottom Left position and texture coordinate */
-      {{0.9f, 0.9f}, {1.0f, 1.0f}},  /* Top Right position and texture coordinate */
-      {{-0.9f, 0.9f}, {1.0f, 0.0f}}   /* Top Left position and texture coordinate */
-  };
-
-  GL::Buffer buffer;
-  buffer.setData(data);
-  mesh_.setCount(6).addVertexBuffer(std::move(buffer), 0,
-                                    Shaders::Flat2D::Position{},
-                                    Shaders::Flat2D::TextureCoordinates{});
-
-  const int imSize = 128;
-  Containers::Array<char> imdata;
-  Containers::arrayResize(imdata, imSize * imSize * 3);
-  for (int i = 0; i < imSize * imSize * 3; i+=3) {
-    imdata[i] = 142;
-    imdata[i+1] = 0;
-    imdata[i+2] = 0;
+  // Start SDL
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+    return 1;
   }
 
-  auto image = Containers::Pointer<Trade::ImageData2D>(new Trade::ImageData2D{
-      PixelFormat::RGB8Unorm, {imSize, imSize}, std::move(imdata)});
+  // Open a window
+  SDL_Window *win = SDL_CreateWindow("Hello World!", 100, 100, width, height,
+                                     SDL_WINDOW_SHOWN);
+  if (win == nullptr) {
+    std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+    SDL_Quit();
+    return 1;
+  }
 
-  texture_.setWrapping(GL::SamplerWrapping::ClampToEdge)
-      .setMagnificationFilter(GL::SamplerFilter::Linear)
-      .setMinificationFilter(GL::SamplerFilter::Linear)
-      .setStorage(1, GL::textureFormat(image->format()), image->size())
-      .setSubImage(0, {}, *image);
+  // Creating a renderer
+  SDL_Renderer *ren = SDL_CreateRenderer(
+      win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  if (ren == nullptr) {
+    SDL_DestroyWindow(win);
+    std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+    SDL_Quit();
+    return 1;
+  }
 
-  /* Loop frame as fast as possible */
-  setSwapInterval(0);
+  // Create my own surface.
+  SDL_Surface *surface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+
+  // Fiddle with the pixels
+  SDL_LockSurface(surface);
+
+  // Set fixed colour (white)
+  Uint32 color = 0x00FF00;
+  for (int x = 0; x < width; ++x) {
+    for (int y = 0; y < height; ++y) {
+      Uint8 *pixel = (Uint8 *)surface->pixels;
+      pixel += (y * surface->pitch) + (x * sizeof(Uint32));
+      *((Uint32 *)pixel) = color;
+    }
+  }
+
+  SDL_UnlockSurface(surface);
+
+  // Create texture from surface
+  SDL_Texture *tex = SDL_CreateTextureFromSurface(ren, surface);
+
+  // NOTE - surface freed.
+  SDL_FreeSurface(surface);
+  if (tex == nullptr) {
+    SDL_DestroyRenderer(ren);
+    SDL_DestroyWindow(win);
+    std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError()
+              << std::endl;
+    SDL_Quit();
+    return 1;
+  }
+
+  // Drawing the texture.
+  // A sleepy rendering loop, wait for 3 seconds and render and present the
+  // screen each time
+  for (int i = 0; i < 3; ++i) {
+    // First clear the renderer
+    SDL_RenderClear(ren);
+    // Draw the texture
+    SDL_RenderCopy(ren, tex, NULL, NULL);
+    // Update the screen
+    SDL_RenderPresent(ren);
+    // Take a quick break after all that hard work
+    SDL_Delay(1000);
+  }
+
+  // Clean up
+  SDL_DestroyTexture(tex);
+  SDL_DestroyRenderer(ren);
+  SDL_DestroyWindow(win);
+  SDL_Quit();
+
+  return 0;
 }
-
-void Raytrace::drawEvent() {
-  GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
-  shader_.bindTexture(texture_).draw(mesh_);
-  swapBuffers();
-}
-
-MAGNUM_APPLICATION_MAIN(Raytrace)
