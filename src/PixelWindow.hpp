@@ -132,6 +132,7 @@ template <class T> class PixelWindow {
             SDL_WaitEvent(&event);
             switch (event.type) {
             case SDL_QUIT:
+                std::cerr << "\nQuit Raytrace" << std::endl;
                 return;
             }
         }
