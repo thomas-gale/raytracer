@@ -5,6 +5,8 @@ add_executable(raytrace
     Vec3.hpp
     Color.hpp
     Ray.hpp
+    Hittable.hpp
+    Sphere.hpp
     Pixel.hpp
     PixelWindow.hpp
     Main.cpp)

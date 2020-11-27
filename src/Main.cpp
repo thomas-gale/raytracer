@@ -6,6 +6,7 @@
 #include "Color.hpp"
 #include "PixelWindow.hpp"
 #include "Ray.hpp"
+#include "Sphere.hpp"
 #include "Vec3.hpp"
 
 using namespace raytrace;
