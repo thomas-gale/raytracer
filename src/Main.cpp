@@ -20,5 +20,11 @@ int main() {
     pw.setPrettyColor();
     pw.draw();
 
+    pw.setSolidColor(Color<double>(1.0, 1.0, 1.0));
+    pw.draw();
+
+    pw.setPixel(100, 100, Color<double>(0.0, 0.0, 0.0));
+    pw.draw();
+
     return 0;
 }

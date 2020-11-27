@@ -108,9 +108,8 @@ template <class T> class PixelWindow {
         int pitch;
         uint8_t* pixels;
         SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
-        Uint32* p = (Uint32*)(pixels + pitch * y +
-                              pitch * x); // cast for a pointer increments
-                                          // by 4 bytes.(RGBA)
+        Uint32* p = (Uint32*)(pixels + pitch * y); 
+        p+=x;
         *p = convertRGBA(color);
         SDL_UnlockTexture(tex);
     }
