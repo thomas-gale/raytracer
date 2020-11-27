@@ -5,6 +5,7 @@ add_executable(raytrace
     Vec3.hpp
     Color.hpp
     Ray.hpp
+    Common.hpp
     Hittable.hpp
     HittableList.hpp
     Sphere.hpp

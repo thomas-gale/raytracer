@@ -18,15 +18,15 @@ template <class T> class Sphere : public Hittable<T> {
         auto c = oc.lengthSquared() - radius * radius;
 
         auto discriminant = halfB * halfB - a * c;
-        if (discriminant > 0)
+        if (discriminant < 0)
             return false;
         auto sqrtd = std::sqrt(discriminant);
 
         // Find the nearest root (that's in the range)
         // We check for the other solution if current root is out of range
-        auto root = (-halfB - std::sqrt(a)) / a;
+        auto root = (-halfB - sqrtd) / a;
         if (root < tMin || root > tMax) {
-            root = (-halfB + std::sqrt(a)) / a;
+            root = (-halfB + sqrtd) / a;
             if (root < tMin || root > tMax) {
                 return false;
             }

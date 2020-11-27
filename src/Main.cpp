@@ -1,40 +1,24 @@
 #include <iostream>
 #include <vector>
 
-#include <SDL.h>
+#include "Common.hpp"
 
 #include "Color.hpp"
 #include "HittableList.hpp"
-#include "PixelWindow.hpp"
-#include "Ray.hpp"
 #include "Sphere.hpp"
-#include "Vec3.hpp"
+
+#include "PixelWindow.hpp"
 
 using namespace raytrace;
 
-// Using the quadradic formula
-// Performed some simplifications (b = 2h)
 template <class T>
-T hitSphere(const Point3<T>& center, T radius, const Ray<T>& r) {
-    Vec3<T> oc = r.origin() - center;
-    auto a = r.direction().lengthSquared();
-    auto halfB = dot(oc, r.direction());
-    auto c = oc.lengthSquared() - radius * radius;
-    auto discriminant = halfB * halfB - a * c;
-    if (discriminant < 0) {
-        return -1.0;
-    }
-    return (-halfB - std::sqrt(discriminant)) / a;
-}
-
-template <class T> Color<T> rayColor(const Ray<T>& r) {
-    auto t = hitSphere(Point3<T>(0, 0, -1), 0.5, r);
-    if (t > 0) {
-        Vec3<T> n = unit(r.at(t) - Vec3<T>(0, 0, -1));
-        return 0.5 * Color<T>(n.x() + 1, n.y() + 1, n.z() + 1);
+Color<T> rayColor(const Ray<T>& r, const Hittable<T>& world) {
+    HitRecord<T> rec;
+    if (world.hit(r, 0, infinity, rec)) {
+        return 0.5 * (rec.normal + Color<T>(1, 1, 1));
     }
     Vec3<T> unitDirection = unit(r.direction());
-    t = 0.5 * (unitDirection.y() + 1.0);
+    auto t = 0.5 * (unitDirection.y() + 1.0);
     return (1.0 - t) * Color<T>(1, 1, 1) + t * Color<T>(0.5, 0.7, 1.0);
 }
 
@@ -45,6 +29,13 @@ int main() {
     const auto aspectRatio = 16.0 / 9.0;
     const int width = 512;
     const int height = static_cast<int>(width / aspectRatio);
+
+    // World.
+    HittableList<double> world;
+    world.add(std::make_shared<Sphere<double>>(Point3<double>(0, 0, -1),
+                                               0.5)); // Focal sphere.
+    world.add(std::make_shared<Sphere<double>>(
+        Point3<double>(0, -100.5, -1), 100)); // Massive 'ground' sphere.
 
     // Camera.
     auto viewportHeight = 2.0;
@@ -66,9 +57,9 @@ int main() {
         for (int x = 0; x < width; ++x) {
             auto u = double(x) / (width - 1);
             auto v = double(y) / (height - 1);
-            Ray<double> r(origin, lowerLeftCorner + u * horizontal +
-                                      v * vertical - origin);
-            Color<double> pixelColor = rayColor(r);
+            Ray<double> r(origin,
+                          lowerLeftCorner + u * horizontal + v * vertical);
+            Color<double> pixelColor = rayColor(r, world);
             line[x] = Pixel<double>(Point2<int>(x, y), pixelColor);
         }
         pw.setPixels(line);
