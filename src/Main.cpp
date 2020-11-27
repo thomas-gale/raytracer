@@ -10,10 +10,23 @@
 
 using namespace raytrace;
 
+// Using the quadradic formula (we just care about the sqrt discriminant part)
+template <class T>
+bool hitSphere(const Point3<T>& center, T radius, const Ray<T>& r) {
+    Vec3<T> oc = r.origin() - center;
+    auto a = dot(r.direction(), r.direction());
+    auto b = 2.0 * dot(oc, r.direction());
+    auto c = dot(oc, oc) - radius * radius;
+    auto discriminant = b * b - 4 * a * c;
+    return discriminant > 0;
+}
+
 template <class T> Color<T> rayColor(const Ray<T>& r) {
+    if (hitSphere(Point3<T>(0, 0, -1), 0.5, r))
+        return Color<T>(1, 0, 0);
     Vec3<T> unitDirection = unit(r.direction());
     auto t = 0.5 * (unitDirection.y() + 1.0);
-    return (1.0 - t) * Color<T>(1.0, 1.0, 1.0) + t * Color<T>(0.5, 0.7, 1.0);
+    return (1.0 - t) * Color<T>(1, 1, 1) + t * Color<T>(0.5, 0.7, 1.0);
 }
 
 int main() {
