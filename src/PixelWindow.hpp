@@ -122,6 +122,19 @@ template <class T> class PixelWindow {
         SDL_UnlockTexture(tex);
     }
 
+    // Spin till quit requested
+    void awaitQuit() {
+        SDL_Event event;
+        bool quit = false;
+        while (true) {
+            SDL_WaitEvent(&event);
+            switch (event.type) {
+            case SDL_QUIT:
+                return;
+            }
+        }
+    }
+
     PixelWindow(const PixelWindow& other) = delete;
     PixelWindow(PixelWindow&& other) = delete;
     PixelWindow& operator=(const PixelWindow& other) = delete;
