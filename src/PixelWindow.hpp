@@ -104,12 +104,13 @@ template <class T> class PixelWindow {
         SDL_UnlockTexture(tex);
     }
 
+    // Using bottom left coordinate system.
     void setPixel(int x, int y, const Color<T>& color) {
         int pitch;
         uint8_t* pixels;
         SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
-        Uint32* p = (Uint32*)(pixels + pitch * y); 
-        p+=x;
+        Uint32* p = (Uint32*)(pixels + pitch * (height - y));
+        p += x;
         *p = convertRGBA(color);
         SDL_UnlockTexture(tex);
     }
