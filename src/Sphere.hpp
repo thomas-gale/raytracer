@@ -35,7 +35,8 @@ template <class T> class Sphere : public Hittable<T> {
         // Set the output HitRecord
         rec.t = root;
         rec.p = r.at(rec.t);
-        rec.normal = (rec.p - center) / radius;
+        Vec3<T> outwardNormal = (rec.p - center) / radius;
+        rec.setFaceNormal(r, outwardNormal);
 
         return true;
     }

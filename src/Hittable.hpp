@@ -18,6 +18,7 @@ template <class T> class HitRecord {
     }
 };
 
+// Generic object that rays can interact with
 template <class T> class Hittable {
   public:
     virtual bool hit(const Ray<T>& r, T tMin, T tMax,
