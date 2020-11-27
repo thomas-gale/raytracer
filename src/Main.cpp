@@ -11,17 +11,18 @@
 using namespace raytrace;
 
 // Using the quadradic formula
+// Performed some simplifications (b = 2h)
 template <class T>
 T hitSphere(const Point3<T>& center, T radius, const Ray<T>& r) {
     Vec3<T> oc = r.origin() - center;
-    auto a = dot(r.direction(), r.direction());
-    auto b = 2.0 * dot(oc, r.direction());
-    auto c = dot(oc, oc) - radius * radius;
-    auto discriminant = b * b - 4 * a * c;
+    auto a = r.direction().lengthSquared();
+    auto halfB = dot(oc, r.direction());
+    auto c = oc.lengthSquared() - radius * radius;
+    auto discriminant = halfB * halfB - a * c;
     if (discriminant < 0) {
         return -1.0;
     }
-    return (-b - std::sqrt(discriminant)) / (2.0 * a);
+    return (-halfB - std::sqrt(discriminant)) / a;
 }
 
 template <class T> Color<T> rayColor(const Ray<T>& r) {
@@ -72,5 +73,6 @@ int main() {
         pw.draw();
     }
 
+    pw.awaitQuit();
     return 0;
 }
