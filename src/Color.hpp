@@ -5,7 +5,7 @@
 
 namespace raytrace {
 
-template <class T> uint32_t convertRGBA(Color<T> pixelColor) {
+template <class T> uint32_t convertRGBA(const Color<T>& pixelColor) {
     uint32_t c = static_cast<uint8_t>(255.999 * pixelColor.x());
     c <<= 8;
     c |= static_cast<uint8_t>(255.999 * pixelColor.y());

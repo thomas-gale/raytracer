@@ -8,7 +8,7 @@ namespace raytrace {
 
 template <class T> class Vec3 {
   public:
-    Vec3() : e{0.0, 0.0, 0.0} {}
+    Vec3() : e{0, 0, 0} {}
     Vec3(T x, T y, T z) : e{x, y, z} {}
 
     T x() const { return e[0]; }
@@ -37,9 +37,9 @@ template <class T> class Vec3 {
 
     Vec3& operator/=(const T t) { return *this *= 1.0 / t; }
 
-    T length() const { return std::sqrt<T>(lengthSquared()); }
-
     T lengthSquared() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
+
+    T length() const { return std::sqrt(lengthSquared()); }
 
     // Utility functions
 
@@ -76,6 +76,8 @@ template <class T> class Vec3 {
                     u.e[2] * v.e[0] - u.e[0] * v.e[2],
                     u.e[0] * v.e[1] - u.e[1] * v.e[0]);
     }
+
+    inline friend Vec3 unit(Vec3 v) { return v / v.length(); }
 
   private:
     T e[3];

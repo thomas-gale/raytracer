@@ -1,9 +1,12 @@
 #ifndef PIXELWINDOW_H
 #define PIXELWINDOW_H
 
+#include <vector>
+
 #include <SDL.h>
 
 #include "Color.hpp"
+#include "Pixel.hpp"
 
 namespace raytrace {
 
@@ -70,17 +73,12 @@ template <class T> class PixelWindow {
         for (int y = 0; y < height; y++) {
             std::cerr << "\rScanlines remaining: " << height - y - 1 << " "
                       << std::flush;
-            Uint32* p =
-                (Uint32*)(pixels + pitch * y); // cast for a pointer increments
-                                               // by 4 bytes.(RGBA)
             for (int x = 0; x < width; x++) {
                 // Compute color
                 auto r = double(x) / double(width);
                 auto g = double(height - y) / double(height);
                 auto b = 0.25;
-
-                *p = convertRGBA(Color<double>(r, g, b));
-                ++p;
+                setPixelUnlocked(pitch, pixels, x, y, Color<double>(r, g, b));
             }
         }
         SDL_UnlockTexture(tex);
@@ -93,18 +91,15 @@ template <class T> class PixelWindow {
         for (int y = 0; y < height; y++) {
             std::cerr << "\rScanlines remaining: " << height - y - 1 << " "
                       << std::flush;
-            Uint32* p =
-                (Uint32*)(pixels + pitch * y); // cast for a pointer increments
-                                               // by 4 bytes.(RGBA)
             for (int x = 0; x < width; x++) {
-                *p = convertRGBA(color);
-                ++p;
+                setPixelUnlocked(pitch, pixels, x, y, color);
             }
         }
         SDL_UnlockTexture(tex);
     }
 
     // Using bottom left coordinate system.
+    // This is slooow.
     void setPixel(int x, int y, const Color<T>& color) {
         int pitch;
         uint8_t* pixels;
@@ -112,6 +107,18 @@ template <class T> class PixelWindow {
         Uint32* p = (Uint32*)(pixels + pitch * (height - y));
         p += x;
         *p = convertRGBA(color);
+        SDL_UnlockTexture(tex);
+    }
+
+    // Using bottom left coordinate system.
+    void setPixels(const std::vector<Pixel<T>>& pixels) {
+        int pitch;
+        uint8_t* pixelsPtr;
+        SDL_LockTexture(tex, NULL, (void**)&pixelsPtr, &pitch);
+        for (const Pixel<T>& pixel : pixels) {
+            setPixelUnlocked(pitch, pixelsPtr, pixel.location().x(),
+                             pixel.location().y(), pixel.color());
+        }
         SDL_UnlockTexture(tex);
     }
 
@@ -125,6 +132,13 @@ template <class T> class PixelWindow {
     SDL_Window* win;
     SDL_Renderer* ren;
     SDL_Texture* tex;
+
+    inline void setPixelUnlocked(int pitch, uint8_t* pixels, int x, int y,
+                                 const Color<T>& color) {
+        Uint32* p = (Uint32*)(pixels + pitch * (height - y - 1));
+        p += x;
+        *p = convertRGBA(color);
+    }
 };
 
 } // namespace raytrace
