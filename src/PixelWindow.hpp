@@ -48,16 +48,9 @@ template <class T> class PixelWindow {
             SDL_Quit();
             return;
         }
-
-        // Init low level pixel storage
-        //pixelFormat = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
-        //pixels = (uint32_t*)malloc(sizeof(uint32_t) * width * height);
-        //SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
     }
 
     ~PixelWindow() {
-        //free(pixelFormat);
-        //free(pixels);
         SDL_DestroyTexture(tex);
         SDL_DestroyRenderer(ren);
         SDL_DestroyWindow(win);
@@ -132,8 +125,6 @@ template <class T> class PixelWindow {
     SDL_Window* win;
     SDL_Renderer* ren;
     SDL_Texture* tex;
-    //uint32_t* pixels;
-    //SDL_PixelFormat* pixelFormat;
 };
 
 } // namespace raytrace
