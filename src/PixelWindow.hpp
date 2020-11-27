@@ -99,7 +99,7 @@ template <class T> class PixelWindow {
     }
 
     // Using bottom left coordinate system.
-    // This is slooow.
+    // NOTE - This is slooow - batch and call setPixels with a vector of pixels.
     void setPixel(int x, int y, const Color<T>& color) {
         int pitch;
         uint8_t* pixels;
@@ -111,13 +111,15 @@ template <class T> class PixelWindow {
     }
 
     // Using bottom left coordinate system.
-    void setPixels(const std::vector<Pixel<T>>& pixels) {
+    void setPixels(const std::vector<Pixel<T>>& pixels,
+                   int samplesPerPixel = 1) {
         int pitch;
         uint8_t* pixelsPtr;
         SDL_LockTexture(tex, NULL, (void**)&pixelsPtr, &pitch);
         for (const Pixel<T>& pixel : pixels) {
             setPixelUnlocked(pitch, pixelsPtr, pixel.location().x(),
-                             pixel.location().y(), pixel.color());
+                             pixel.location().y(), pixel.color(),
+                             samplesPerPixel);
         }
         SDL_UnlockTexture(tex);
     }
@@ -147,10 +149,11 @@ template <class T> class PixelWindow {
     SDL_Texture* tex;
 
     inline void setPixelUnlocked(int pitch, uint8_t* pixels, int x, int y,
-                                 const Color<T>& color) {
+                                 const Color<T>& color,
+                                 int samplesPerPixel = 1) {
         Uint32* p = (Uint32*)(pixels + pitch * (height - y - 1));
         p += x;
-        *p = convertRGBA(color);
+        *p = convertRGBA(color, samplesPerPixel);
     }
 };
 

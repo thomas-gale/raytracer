@@ -15,10 +15,18 @@ const double pi = 3.1415926535897932385;
 // Utility functions
 template <class T> inline T degToRad(T deg) { return deg * pi / 180.0; }
 
-template <class T> inline T randomDouble() {
+template <class T> inline T randomReal() {
     static std::uniform_real_distribution<T> dist(0.0, 1.0);
     static std::mt19937 gen;
     return dist(gen);
+}
+
+template <class T> inline T clamp(T x, T min, T max) {
+    if (x < min)
+        return min;
+    if (x > max)
+        return max;
+    return x;
 }
 
 } // namespace raytrace

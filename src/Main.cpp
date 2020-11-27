@@ -3,6 +3,7 @@
 
 #include "Common.hpp"
 
+#include "Camera.hpp"
 #include "Color.hpp"
 #include "HittableList.hpp"
 #include "Sphere.hpp"
@@ -27,8 +28,9 @@ int main() {
 
     // Image.
     const auto aspectRatio = 16.0 / 9.0;
-    const int width = 512;
+    const int width = 1024;
     const int height = static_cast<int>(width / aspectRatio);
+    const int samplesPerPixel = 100;
 
     // World.
     HittableList<double> world;
@@ -38,15 +40,7 @@ int main() {
         Point3<double>(0, -100.5, -1), 100)); // Massive 'ground' sphere.
 
     // Camera.
-    auto viewportHeight = 2.0;
-    auto viewportWidth = aspectRatio * viewportHeight;
-    auto focalLength = 1.0;
-
-    auto origin = Point3<double>(0.0, 0.0, 0.0);
-    auto horizontal = Vec3<double>(viewportWidth, 0.0, 0.0);
-    auto vertical = Vec3<double>(0.0, viewportHeight, 0.0);
-    auto lowerLeftCorner = origin - horizontal / 2 - vertical / 2 -
-                           Vec3<double>(0.0, 0.0, focalLength);
+    Camera<double> cam;
 
     // Render.
     PixelWindow<double> pw(width, height);
@@ -55,14 +49,16 @@ int main() {
         std::cerr << "\rScanlines remaining: " << y << ' ' << std::flush;
         std::vector<Pixel<double>> line(width);
         for (int x = 0; x < width; ++x) {
-            auto u = double(x) / (width - 1);
-            auto v = double(y) / (height - 1);
-            Ray<double> r(origin,
-                          lowerLeftCorner + u * horizontal + v * vertical);
-            Color<double> pixelColor = rayColor(r, world);
+            Color<double> pixelColor(0, 0, 0);
+            for (int s = 0; s < samplesPerPixel; ++s) {
+                auto u = (double(x) + randomReal<double>()) / (width - 1);
+                auto v = (double(y) + randomReal<double>()) / (height - 1);
+                Ray<double> r = cam.getRay(u, v);
+                pixelColor += rayColor(r, world);
+            }
             line[x] = Pixel<double>(Point2<int>(x, y), pixelColor);
         }
-        pw.setPixels(line);
+        pw.setPixels(line, samplesPerPixel);
         pw.draw();
     }
 

@@ -6,6 +6,7 @@ add_executable(raytrace
     Color.hpp
     Ray.hpp
     Common.hpp
+    Camera.hpp
     Hittable.hpp
     HittableList.hpp
     Sphere.hpp
