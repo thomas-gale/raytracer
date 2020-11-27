@@ -17,6 +17,7 @@ int main() {
     int height = 480;
 
     PixelWindow<double> pw(width, height);
+    pw.setPrettyColor();
     pw.draw();
     // pw.setSolidColor(Color<double>(0.0, 0.0, 0.0));
     // pw.draw();

@@ -3,6 +3,8 @@
 
 #include <SDL.h>
 
+#include "Color.hpp"
+
 namespace raytrace {
 
 template <class T> class PixelWindow {
@@ -79,19 +81,19 @@ template <class T> class PixelWindow {
 
     void draw() {
 
-        Uint32 format;
-        int w;
-        int h;
-        SDL_QueryTexture(tex, &format, NULL, &w, &h);
+        // Uint32 format;
+        // int w;
+        // int h;
+        // SDL_QueryTexture(tex, &format, NULL, &w, &h);
 
-        int pitch;
+        /*int pitch;
         uint8_t* pixels;
         SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
-        for (int y = 0; y < h; y++) {
+        for (int y = 0; y < height; y++) {
             Uint32* p =
                 (Uint32*)(pixels + pitch * y); // cast for a pointer increments
                                                // by 4 bytes.(RGBA)
-            for (int x = 0; x < w; x++) {
+            for (int x = 0; x < width; x++) {
                 // *p = 0x00FF0000;
                 if (x > 20)
                     *p = SDL_MapRGBA(pixelFormat, 255, 0, 0, 255);
@@ -103,14 +105,34 @@ template <class T> class PixelWindow {
                 p++;
             }
         }
-        SDL_UnlockTexture(tex);
+        SDL_UnlockTexture(tex);*/
 
-        // First clear the renderer
         SDL_RenderClear(ren);
-        // Draw the texture
         SDL_RenderCopy(ren, tex, NULL, NULL);
-        // Update the screen
         SDL_RenderPresent(ren);
+    }
+
+    void setPrettyColor() {
+        int pitch;
+        uint8_t* pixels;
+        SDL_LockTexture(tex, NULL, (void**)&pixels, &pitch);
+        for (int y = 0; y < height; y++) {
+            std::cerr << "\rScanlines remaining: " << height - y - 1 << " "
+                      << std::flush;
+            Uint32* p =
+                (Uint32*)(pixels + pitch * y); // cast for a pointer increments
+                                               // by 4 bytes.(RGBA)
+            for (int x = 0; x < width; x++) {
+                // Compute color
+                auto r = double(x) / double(width);
+                auto g = double(height - y) / double(height);
+                auto b = 0.25;
+
+                *p = convertRGBA(Color<double>(r, g, b));
+                ++p;
+            }
+        }
+        SDL_UnlockTexture(tex);
     }
 
     /*void setPrettyColor() {
