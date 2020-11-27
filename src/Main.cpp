@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 #include "Color.hpp"
+#include "HittableList.hpp"
 #include "PixelWindow.hpp"
 #include "Ray.hpp"
 #include "Sphere.hpp"
