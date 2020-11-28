@@ -7,10 +7,12 @@ namespace raytrace {
 
 template <class T> class Camera {
   public:
-    Camera() {
-        const auto aspectRatio = 16.0 / 9.0;
-        auto viewportHeight = 2.0;
+    Camera(T vFovDeg, T aspectRatio) {
+        auto theta = degToRad(vFovDeg);
+        auto h = std::tan(theta / 2);
+        auto viewportHeight = 2.0 * h;
         auto viewportWidth = aspectRatio * viewportHeight;
+
         auto focalLength = 1.0;
 
         origin = Point3<T>(0.0, 0.0, 0.0);
