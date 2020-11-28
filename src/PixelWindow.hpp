@@ -20,8 +20,8 @@ template <class T> class PixelWindow {
         }
 
         // Open a window
-        win = SDL_CreateWindow("Pixel Window", 1200, 100, width, height,
-                               SDL_WINDOW_SHOWN);
+        win = SDL_CreateWindow("Pixel Window", 1920 - width - 100, 100, width,
+                               height, SDL_WINDOW_SHOWN);
         if (win == nullptr) {
             std::cout << "SDL_CreateWindow Error: " << SDL_GetError()
                       << std::endl;
