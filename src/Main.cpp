@@ -6,6 +6,7 @@
 #include "Camera.hpp"
 #include "Color.hpp"
 #include "HittableList.hpp"
+#include "Material.hpp"
 #include "Sphere.hpp"
 
 #include "PixelWindow.hpp"
@@ -21,12 +22,15 @@ Color<T> rayColor(const Ray<T>& r, const Hittable<T>& world, int depth) {
         return Color<T>(0, 0, 0);
 
     if (world.hit(r, 0.001, infinity, rec)) {
-        Point3<T> target = rec.p + rec.normal + Vec3<T>::randomUnitVec();
-        //Point3<T> target = rec.p + Vec3<T>::randomInHemisphere(rec.normal);
-        // Bounce
-        return 0.5 *
-               rayColor<T>(Ray<T>(rec.p, target - rec.p), world, depth - 1);
+        Ray<T> scattered;
+        Color<T> attenuation;
+        if (rec.mat->scatter(r, rec, attenuation, scattered)) {
+            return attenuation * rayColor<T>(scattered, world, depth - 1);
+        }
+        return Color<T>(0, 0, 0);
     }
+
+    // Environment coloring.
     Vec3<T> unitDirection = unit(r.direction());
     auto t = 0.5 * (unitDirection.y() + 1.0);
     return (1.0 - t) * Color<T>(1, 1, 1) + t * Color<T>(0.5, 0.7, 1.0);
@@ -44,10 +48,25 @@ int main() {
 
     // World.
     HittableList<double> world;
-    world.add(std::make_shared<Sphere<double>>(Point3<double>(0, 0, -1),
-                                               0.5)); // Focal sphere.
+
+    auto matGround =
+        std::make_shared<Lambertian<double>>(Color<double>(0.8, 0.8, 0));
+    auto matCenter =
+        std::make_shared<Lambertian<double>>(Color<double>(0.7, 0.3, 0.3));
+    auto matLeft =
+        std::make_shared<Metal<double>>(Color<double>(0.8, 0.8, 0.8));
+    auto matRight =
+        std::make_shared<Metal<double>>(Color<double>(0.8, 0.6, 0.2));
+
     world.add(std::make_shared<Sphere<double>>(
-        Point3<double>(0, -100.5, -1), 100)); // Massive 'ground' sphere.
+        Point3<double>(0, -100.5, -1), 100,
+        matGround)); // Massive 'ground' sphere.
+    world.add(std::make_shared<Sphere<double>>(Point3<double>(0, 0, -1), 0.5,
+                                               matCenter));
+    world.add(std::make_shared<Sphere<double>>(Point3<double>(-1, 0, -1), 0.5,
+                                               matLeft));
+    world.add(std::make_shared<Sphere<double>>(Point3<double>(1, 0, -1), 0.5,
+                                               matRight));
 
     // Camera.
     Camera<double> cam;

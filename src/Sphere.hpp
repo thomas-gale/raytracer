@@ -8,7 +8,8 @@ namespace raytrace {
 template <class T> class Sphere : public Hittable<T> {
   public:
     Sphere() {}
-    Sphere(Point3<T> cen, T r) : center(cen), radius(r) {}
+    Sphere(Point3<T> cen, T r, std::shared_ptr<Material<T>> m)
+        : center(cen), radius(r), mat(m) {}
 
     virtual bool hit(const Ray<T>& r, T tMin, T tMax,
                      HitRecord<T>& rec) const override {
@@ -37,6 +38,7 @@ template <class T> class Sphere : public Hittable<T> {
         rec.p = r.at(rec.t);
         Vec3<T> outwardNormal = (rec.p - center) / radius;
         rec.setFaceNormal(r, outwardNormal);
+        rec.mat = mat;
 
         return true;
     }
@@ -44,6 +46,7 @@ template <class T> class Sphere : public Hittable<T> {
   private:
     Point3<T> center;
     T radius;
+    std::shared_ptr<Material<T>> mat;
 };
 
 } // namespace raytrace

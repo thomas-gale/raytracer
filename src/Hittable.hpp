@@ -1,14 +1,17 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include "Vec3.hpp"
+#include "Common.hpp"
 
 namespace raytrace {
+
+template <class T> class Material;
 
 template <class T> class HitRecord {
   public:
     Point3<T> p;
     Vec3<T> normal;
+    std::shared_ptr<Material<T>> mat;
     T t;
     bool frontFace;
 

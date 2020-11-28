@@ -11,6 +11,7 @@ namespace raytrace {
 // Constants
 const double infinity = std::numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;
+const double epsilon = 1e-8;
 
 // Utility functions
 template <class T> inline T degToRad(T deg) { return deg * pi / 180.0; }
