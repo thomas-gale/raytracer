@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <vector>
 
@@ -53,26 +54,25 @@ int main() {
         std::make_shared<Lambertian<real>>(Color<real>(0.8, 0.8, 0));
     auto matCenter =
         std::make_shared<Lambertian<real>>(Color<real>(0.7, 0.3, 0.3));
-    auto matLeft =
-        std::make_shared<Metal<real>>(Color<real>(0.8, 0.8, 0.8));
-    auto matRight =
-        std::make_shared<Metal<real>>(Color<real>(0.8, 0.6, 0.2));
+    auto matLeft = std::make_shared<Metal<real>>(Color<real>(0.8, 0.8, 0.8));
+    auto matRight = std::make_shared<Metal<real>>(Color<real>(0.8, 0.6, 0.2));
 
-    world.add(std::make_shared<Sphere<real>>(
-        Point3<real>(0, -100.5, -1), 100,
-        matGround)); // Massive 'ground' sphere.
-    world.add(std::make_shared<Sphere<real>>(Point3<real>(0, 0, -1), 0.5,
-                                               matCenter));
-    world.add(std::make_shared<Sphere<real>>(Point3<real>(-1, 0, -1), 0.5,
-                                               matLeft));
-    world.add(std::make_shared<Sphere<real>>(Point3<real>(1, 0, -1), 0.5,
-                                               matRight));
+    world.add(
+        std::make_shared<Sphere<real>>(Point3<real>(0, -100.5, -1), 100,
+                                       matGround)); // Massive 'ground' sphere.
+    world.add(
+        std::make_shared<Sphere<real>>(Point3<real>(0, 0, -1), 0.5, matCenter));
+    world.add(
+        std::make_shared<Sphere<real>>(Point3<real>(-1, 0, -1), 0.5, matLeft));
+    world.add(
+        std::make_shared<Sphere<real>>(Point3<real>(1, 0, -1), 0.5, matRight));
 
     // Camera.
     Camera<real> cam;
 
-    // Render.
+    // Render (with timer)
     PixelWindow<real> pw(width, height);
+    auto start = std::chrono::high_resolution_clock::now();
 
     for (int y = height - 1; y >= 0; --y) {
         std::cerr << "\rScanlines remaining: " << y << ' ' << std::flush;
@@ -90,6 +90,12 @@ int main() {
         pw.setPixels(line, samplesPerPixel);
         pw.draw();
     }
+
+    // Display timing info.
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration =
+        std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+    std::cerr << "\nCompleted: " << duration.count() << "s\n" << std::flush;
 
     pw.awaitQuit();
     return 0;

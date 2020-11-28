@@ -9,7 +9,7 @@
 namespace raytrace {
 
 // Precision
-using real = double;
+using real = float;
 
 // Constants
 const real infinity = std::numeric_limits<real>::infinity();
