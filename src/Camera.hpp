@@ -8,28 +8,32 @@ namespace raytrace {
 template <class T> class Camera {
   public:
     Camera(Point3<T> lookFrom, Point3<T> lookAt, Vec3<T> vUp, T vFovDeg,
-           T aspectRatio) {
+           T aspectRatio, T aperture, T focusDist) {
         auto theta = degToRad(vFovDeg);
         auto h = std::tan(theta / 2);
         auto viewportHeight = 2.0 * h;
         auto viewportWidth = aspectRatio * viewportHeight;
 
         // Orthonormalise from vUp and lookAt/lookFrom.
-        auto w = unit(lookFrom - lookAt);
-        auto u = unit(cross(vUp, w));
-        auto v = cross(w, u);
-
-        auto focalLength = 1.0;
+        w = unit(lookFrom - lookAt);
+        u = unit(cross(vUp, w));
+        v = cross(w, u);
 
         origin = lookFrom;
-        horizontal = viewportWidth * u;
-        vertical = viewportHeight * v;
-        lowerLeftCorner = origin - horizontal / 2 - vertical / 2 - w;
+        horizontal = focusDist * viewportWidth * u;
+        vertical = focusDist * viewportHeight * v;
+        lowerLeftCorner =
+            origin - horizontal / 2 - vertical / 2 - focusDist * w;
+        lensRadius = aperture / 2;
     }
 
-    Ray<T> getRay(T u, T v) const {
-        return Ray<T>(origin,
-                      lowerLeftCorner + u * horizontal + v * vertical - origin);
+    Ray<T> getRay(T s, T t) const {
+        // Sample a ray from within the lens radius
+        Vec3<T> rd = lensRadius * Vec3<T>::randomInUnitDisk();
+        Vec3<T> offset = u * rd.x() + v * rd.y();
+
+        return Ray<T>(origin + offset, lowerLeftCorner + s * horizontal +
+                                           t * vertical - origin - offset);
     }
 
   private:
@@ -37,6 +41,8 @@ template <class T> class Camera {
     Point3<T> lowerLeftCorner;
     Vec3<T> horizontal;
     Vec3<T> vertical;
+    Vec3<T> u, v, w;
+    T lensRadius;
 };
 
 } // namespace raytrace

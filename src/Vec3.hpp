@@ -105,6 +105,16 @@ template <class T> class Vec3 {
                        randomReal<T>(min, max));
     }
 
+    // Simple random sample in unit square, reject untill within circle
+    inline static Vec3 randomInUnitDisk() {
+        while (true) {
+            auto p = Vec3<T>(randomReal<T>(-1, 1), randomReal<T>(-1, 1), 0);
+            if (p.lengthSquared() >= 1)
+                continue; // Not in disk.
+            return p;
+        }
+    }
+
     // Simple random sample in unit cube, reject untill within sphere
     inline static Vec3 randomInUnitSphere() {
         while (true) {

@@ -72,8 +72,14 @@ int main() {
         std::make_shared<Sphere<real>>(Point3<real>(1, 0, -1), 0.5, matRight));
 
     // Camera.
-    Camera<real> cam(Point3<real>(-2, 2, 1), Point3<real>(0, 0, -1),
-                     Vec3<real>(0, 1, 0), 30, aspectRatio);
+    Point3<real> lookFrom(3, 3, 2);
+    Point3<real> lookAt(0, 0, -1);
+    Vec3<real> vUp(0, 1, 0);
+    real distToFocus = (lookFrom - lookAt).length();
+    real aperture = 2.0;
+
+    Camera<real> cam(lookFrom, lookAt, vUp, 20, aspectRatio, aperture,
+                     distToFocus);
 
     // Render (with timer)
     PixelWindow<real> pw(width, height);
