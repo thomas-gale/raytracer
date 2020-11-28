@@ -68,17 +68,18 @@ template <class T> class Dielectric : public Material<T> {
         attenuation = Color<T>(1, 1, 1);
         T refractionRatio = rec.frontFace ? (1.0 / ir) : ir;
         Vec3<T> unitDir = unit(rIn.direction());
-        
+
         T cosTheta = std::min<T>(dot(-unitDir, rec.normal), 1.0);
-        T sinTheta = std::sqrt(1.0 - cosTheta*cosTheta);
+        T sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
         bool cannotRefract = refractionRatio * sinTheta > 1.0;
         Vec3<T> direction;
 
-        if (cannotRefract)
-          direction = reflect(unitDir, rec.normal);
-        else 
-          direction = refract(unitDir, rec.normal, refractionRatio);
+        if (cannotRefract ||
+            reflectance(cosTheta, refractionRatio) > randomReal<T>())
+            direction = reflect(unitDir, rec.normal);
+        else
+            direction = refract(unitDir, rec.normal, refractionRatio);
 
         scattered = Ray<T>(rec.p, direction);
         return true;
@@ -86,6 +87,13 @@ template <class T> class Dielectric : public Material<T> {
 
   private:
     T ir;
+
+    // Using Christope Schlick's approximation for reflectance.
+    static T reflectance(T cos, T refRatio) {
+        auto r0 = (1 - refRatio) / (1 + refRatio);
+        r0 *= r0;
+        return r0 + (1 - r0) * std::pow(1 - cos, 5);
+    }
 };
 
 } // namespace raytrace
