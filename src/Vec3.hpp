@@ -90,6 +90,15 @@ template <class T> class Vec3 {
         return v - 2 * dot(v, n) * n;
     }
 
+    // Refract, using Snell's law
+    inline friend Vec3 refract(const Vec3& uv, const Vec3& n, T etaiOverEtat) {
+        auto cosTheta = std::min<T>(dot(-uv, n), 1.0);
+        Vec3<T> rOutPerp = etaiOverEtat * (uv + cosTheta * n);
+        Vec3<T> rOutParallel =
+            -std::sqrt(std::abs(1.0 - rOutPerp.lengthSquared())) * n;
+        return rOutPerp + rOutParallel;
+    }
+
     // Stochasitic Utility
     inline static Vec3 random(T min = 0.0, T max = 1.0) {
         return Vec3<T>(randomReal<T>(min, max), randomReal<T>(min, max),

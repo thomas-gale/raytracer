@@ -42,7 +42,7 @@ int main() {
 
     // Image.
     const auto aspectRatio = 16.0 / 9.0;
-    const int width = 1024;
+    const int width = 512;
     const int height = static_cast<int>(width / aspectRatio);
     const int samplesPerPixel = 100;
     const int maxDepth = 50;
@@ -52,10 +52,8 @@ int main() {
 
     auto matGround =
         std::make_shared<Lambertian<real>>(Color<real>(0.8, 0.8, 0));
-    auto matCenter =
-        std::make_shared<Lambertian<real>>(Color<real>(0.7, 0.3, 0.3));
-    auto matLeft =
-        std::make_shared<Metal<real>>(Color<real>(0.8, 0.8, 0.8), 0.3);
+    auto matCenter = std::make_shared<Dielectric<real>>(1.5);
+    auto matLeft = std::make_shared<Dielectric<real>>(1.5);
     auto matRight =
         std::make_shared<Metal<real>>(Color<real>(0.8, 0.6, 0.2), 1.0);
 

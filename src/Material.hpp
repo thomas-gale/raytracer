@@ -57,6 +57,28 @@ template <class T> class Metal : public Material<T> {
     T fuzz;
 };
 
+// Dielectric (transparent/refractive) material
+template <class T> class Dielectric : public Material<T> {
+  public:
+    Dielectric(T indexOfRefraction) : ir(indexOfRefraction) {}
+
+    virtual bool scatter(const Ray<T>& rIn, const HitRecord<T>& rec,
+                         Color<T>& attenuation,
+                         Ray<T>& scattered) const override {
+        attenuation = Color<T>(1, 1, 1);
+        T refractionRatio = rec.frontFace ? (1.0 / ir) : ir;
+
+        Vec3<T> unitDir = unit(rIn.direction());
+        Vec3<T> refracted = refract(unitDir, rec.normal, refractionRatio);
+
+        scattered = Ray<T>(rec.p, refracted);
+        return true;
+    }
+
+  private:
+    T ir;
+};
+
 } // namespace raytrace
 
 #endif // MATERIAL_H
