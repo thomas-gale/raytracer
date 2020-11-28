@@ -47,45 +47,45 @@ int main() {
     const int maxDepth = 50;
 
     // World.
-    HittableList<double> world;
+    HittableList<real> world;
 
     auto matGround =
-        std::make_shared<Lambertian<double>>(Color<double>(0.8, 0.8, 0));
+        std::make_shared<Lambertian<real>>(Color<real>(0.8, 0.8, 0));
     auto matCenter =
-        std::make_shared<Lambertian<double>>(Color<double>(0.7, 0.3, 0.3));
+        std::make_shared<Lambertian<real>>(Color<real>(0.7, 0.3, 0.3));
     auto matLeft =
-        std::make_shared<Metal<double>>(Color<double>(0.8, 0.8, 0.8));
+        std::make_shared<Metal<real>>(Color<real>(0.8, 0.8, 0.8));
     auto matRight =
-        std::make_shared<Metal<double>>(Color<double>(0.8, 0.6, 0.2));
+        std::make_shared<Metal<real>>(Color<real>(0.8, 0.6, 0.2));
 
-    world.add(std::make_shared<Sphere<double>>(
-        Point3<double>(0, -100.5, -1), 100,
+    world.add(std::make_shared<Sphere<real>>(
+        Point3<real>(0, -100.5, -1), 100,
         matGround)); // Massive 'ground' sphere.
-    world.add(std::make_shared<Sphere<double>>(Point3<double>(0, 0, -1), 0.5,
+    world.add(std::make_shared<Sphere<real>>(Point3<real>(0, 0, -1), 0.5,
                                                matCenter));
-    world.add(std::make_shared<Sphere<double>>(Point3<double>(-1, 0, -1), 0.5,
+    world.add(std::make_shared<Sphere<real>>(Point3<real>(-1, 0, -1), 0.5,
                                                matLeft));
-    world.add(std::make_shared<Sphere<double>>(Point3<double>(1, 0, -1), 0.5,
+    world.add(std::make_shared<Sphere<real>>(Point3<real>(1, 0, -1), 0.5,
                                                matRight));
 
     // Camera.
-    Camera<double> cam;
+    Camera<real> cam;
 
     // Render.
-    PixelWindow<double> pw(width, height);
+    PixelWindow<real> pw(width, height);
 
     for (int y = height - 1; y >= 0; --y) {
         std::cerr << "\rScanlines remaining: " << y << ' ' << std::flush;
-        std::vector<Pixel<double>> line(width);
+        std::vector<Pixel<real>> line(width);
         for (int x = 0; x < width; ++x) {
-            Color<double> pixelColor(0, 0, 0);
+            Color<real> pixelColor(0, 0, 0);
             for (int s = 0; s < samplesPerPixel; ++s) {
-                auto u = (double(x) + randomReal<double>()) / (width - 1);
-                auto v = (double(y) + randomReal<double>()) / (height - 1);
-                Ray<double> r = cam.getRay(u, v);
+                auto u = (real(x) + randomReal<real>()) / (width - 1);
+                auto v = (real(y) + randomReal<real>()) / (height - 1);
+                Ray<real> r = cam.getRay(u, v);
                 pixelColor += rayColor(r, world, maxDepth);
             }
-            line[x] = Pixel<double>(Point2<int>(x, y), pixelColor);
+            line[x] = Pixel<real>(Point2<int>(x, y), pixelColor);
         }
         pw.setPixels(line, samplesPerPixel);
         pw.draw();
