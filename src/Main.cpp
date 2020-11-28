@@ -42,7 +42,7 @@ int main() {
 
     // Image.
     const auto aspectRatio = 16.0 / 9.0;
-    const int width = 400;
+    const int width = 1024;
     const int height = static_cast<int>(width / aspectRatio);
     const int samplesPerPixel = 100;
     const int maxDepth = 50;
@@ -51,27 +51,29 @@ int main() {
     auto r = std::cos(pi / 4);
     HittableList<real> world;
 
-    /*auto matGround =
+    auto matGround =
         std::make_shared<Lambertian<real>>(Color<real>(0.8, 0.8, 0));
     auto matCenter =
-        std::make_shared<Lambertian<real>>(Color<real>(0.1, 0.2, 0.5));*/
-    auto matLeft = std::make_shared<Lambertian<real>>(Color<real>(0, 0, 1));
-    auto matRight = std::make_shared<Lambertian<real>>(Color<real>(1, 0, 0));
+        std::make_shared<Lambertian<real>>(Color<real>(0.1, 0.2, 0.5));
+    auto matLeft = std::make_shared<Dielectric<real>>(1.5);
+    auto matRight =
+        std::make_shared<Metal<real>>(Color<real>(0.8, 0.6, 0.2), 0.0);
 
-    /*world.add(
+    world.add(
         std::make_shared<Sphere<real>>(Point3<real>(0, -100.5, -1), 100,
                                        matGround)); // Massive 'ground' sphere.
     world.add(
-        std::make_shared<Sphere<real>>(Point3<real>(0, 0, -1), 0.5,
-    matCenter));*/
-
+        std::make_shared<Sphere<real>>(Point3<real>(0, 0, -1), 0.5, matCenter));
     world.add(
-        std::make_shared<Sphere<real>>(Point3<real>(-r, 0, -1), r, matLeft));
+        std::make_shared<Sphere<real>>(Point3<real>(-1, 0, -1), 0.5, matLeft));
+    world.add(std::make_shared<Sphere<real>>(Point3<real>(-1, 0, -1), -0.4,
+                                             matLeft)); // Hollow inside bubble.
     world.add(
-        std::make_shared<Sphere<real>>(Point3<real>(r, 0, -1), r, matRight));
+        std::make_shared<Sphere<real>>(Point3<real>(1, 0, -1), 0.5, matRight));
 
     // Camera.
-    Camera<real> cam(90, aspectRatio);
+    Camera<real> cam(Point3<real>(-2, 2, 1), Point3<real>(0, 0, -1),
+                     Vec3<real>(0, 1, 0), 30, aspectRatio);
 
     // Render (with timer)
     PixelWindow<real> pw(width, height);

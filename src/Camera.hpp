@@ -7,19 +7,24 @@ namespace raytrace {
 
 template <class T> class Camera {
   public:
-    Camera(T vFovDeg, T aspectRatio) {
+    Camera(Point3<T> lookFrom, Point3<T> lookAt, Vec3<T> vUp, T vFovDeg,
+           T aspectRatio) {
         auto theta = degToRad(vFovDeg);
         auto h = std::tan(theta / 2);
         auto viewportHeight = 2.0 * h;
         auto viewportWidth = aspectRatio * viewportHeight;
 
+        // Orthonormalise from vUp and lookAt/lookFrom.
+        auto w = unit(lookFrom - lookAt);
+        auto u = unit(cross(vUp, w));
+        auto v = cross(w, u);
+
         auto focalLength = 1.0;
 
-        origin = Point3<T>(0.0, 0.0, 0.0);
-        horizontal = Vec3<T>(viewportWidth, 0.0, 0.0);
-        vertical = Vec3<T>(0.0, viewportHeight, 0.0);
-        lowerLeftCorner = origin - horizontal / 2 - vertical / 2 -
-                          Vec3<T>(0.0, 0.0, focalLength);
+        origin = lookFrom;
+        horizontal = viewportWidth * u;
+        vertical = viewportHeight * v;
+        lowerLeftCorner = origin - horizontal / 2 - vertical / 2 - w;
     }
 
     Ray<T> getRay(T u, T v) const {
