@@ -37,6 +37,58 @@ Color<T> rayColor(const Ray<T>& r, const Hittable<T>& world, int depth) {
     return (1.0 - t) * Color<T>(1, 1, 1) + t * Color<T>(0.5, 0.7, 1.0);
 }
 
+template <class T> HittableList<T> randomScene() {
+    using std::make_shared;
+
+    HittableList<T> world;
+
+    auto groundMaterial = make_shared<Lambertian<T>>(Color<T>(0.5, 0.5, 0.5));
+    world.add(
+        make_shared<Sphere<T>>(Point3<T>(0, -1000, 0), 1000, groundMaterial));
+
+    // Scattered little spheres.
+    for (int a = -11; a < 11; ++a) {
+        for (int b = -11; b < 11; ++b) {
+            auto chooseMat = randomReal<T>();
+            Point3<T> center(a + 0.9 * randomReal<T>(), 0.2,
+                             b + 0.9 * randomReal<T>());
+
+            if ((center - Point3<T>(4, 0.2, 0)).length() > 0.9) {
+                std::shared_ptr<Material<T>> sphereMat;
+
+                if (chooseMat < 0.8) {
+                    // Diffuse
+                    auto albedo = Color<T>::random() * Color<T>::random();
+                    sphereMat = make_shared<Lambertian<T>>(albedo);
+                    world.add(make_shared<Sphere<T>>(center, 0.2, sphereMat));
+                } else if (chooseMat < 0.95) {
+                    // Metal
+                    auto albedo = Color<T>::random(0.5, 1);
+                    auto fuzz = randomReal<T>(0, 0.5);
+                    sphereMat = make_shared<Metal<T>>(albedo, fuzz);
+                    world.add(make_shared<Sphere<T>>(center, 0.2, sphereMat));
+                } else {
+                    // Glass
+                    sphereMat = make_shared<Dielectric<T>>(1.5);
+                    world.add(make_shared<Sphere<T>>(center, 0.2, sphereMat));
+                }
+            }
+        }
+    }
+
+    // Three big lads.
+    auto mat1 = make_shared<Dielectric<T>>(1.5);
+    world.add(make_shared<Sphere<T>>(Point3<T>(0, 1, 0), 1.0, mat1));
+
+    auto mat2 = make_shared<Lambertian<T>>(Color<T>(0.4, 0.2, 0.1));
+    world.add(make_shared<Sphere<T>>(Point3<T>(-4, 1, 0), 1.0, mat2));
+
+    auto mat3 = make_shared<Metal<T>>(Color<T>(0.7, 0.6, 0.5), 0.0);
+    world.add(make_shared<Sphere<T>>(Point3<T>(4, 1, 0), 1.0, mat3));
+
+    return world;
+}
+
 int main() {
     std::cout << "Hello Raytrace" << std::endl;
 
@@ -48,35 +100,14 @@ int main() {
     const int maxDepth = 50;
 
     // World.
-    auto r = std::cos(pi / 4);
-    HittableList<real> world;
-
-    auto matGround =
-        std::make_shared<Lambertian<real>>(Color<real>(0.8, 0.8, 0));
-    auto matCenter =
-        std::make_shared<Lambertian<real>>(Color<real>(0.1, 0.2, 0.5));
-    auto matLeft = std::make_shared<Dielectric<real>>(1.5);
-    auto matRight =
-        std::make_shared<Metal<real>>(Color<real>(0.8, 0.6, 0.2), 0.0);
-
-    world.add(
-        std::make_shared<Sphere<real>>(Point3<real>(0, -100.5, -1), 100,
-                                       matGround)); // Massive 'ground' sphere.
-    world.add(
-        std::make_shared<Sphere<real>>(Point3<real>(0, 0, -1), 0.5, matCenter));
-    world.add(
-        std::make_shared<Sphere<real>>(Point3<real>(-1, 0, -1), 0.5, matLeft));
-    world.add(std::make_shared<Sphere<real>>(Point3<real>(-1, 0, -1), -0.4,
-                                             matLeft)); // Hollow inside bubble.
-    world.add(
-        std::make_shared<Sphere<real>>(Point3<real>(1, 0, -1), 0.5, matRight));
+    auto world = randomScene<real>();
 
     // Camera.
-    Point3<real> lookFrom(3, 3, 2);
-    Point3<real> lookAt(0, 0, -1);
+    Point3<real> lookFrom(13, 2, 3);
+    Point3<real> lookAt(0, 0, 0);
     Vec3<real> vUp(0, 1, 0);
-    real distToFocus = (lookFrom - lookAt).length();
-    real aperture = 2.0;
+    real distToFocus = 10.0;
+    real aperture = 0.1;
 
     Camera<real> cam(lookFrom, lookAt, vUp, 20, aspectRatio, aperture,
                      distToFocus);
