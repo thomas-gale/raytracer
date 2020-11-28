@@ -7,3 +7,5 @@ Following the [ray tracing in one weekend](https://raytracing.github.io/) series
 ## Notes
 - Precision of the entire raytracer can be modified in `Common.hpp` by changing the `real` alias.
 - `PixelWindow.hpp` provides a wrapper around a minimal SDL2 window with single full size mutable texture.
+
+## [Development Setup](https://gist.github.com/thomas-gale/70987288d4aed1b6e6b9086341a55fa2)
