@@ -20,8 +20,8 @@ Color<T> rayColor(const Ray<T>& r, const Hittable<T>& world, int depth) {
     if (depth <= 0)
         return Color<T>(0, 0, 0);
 
-    if (world.hit(r, 0, infinity, rec)) {
-        Point3<T> target = rec.p + rec.normal + Vec3<T>::randomInUnitSphere();
+    if (world.hit(r, 0.001, infinity, rec)) {
+        Point3<T> target = rec.p + rec.normal + Vec3<T>::randomUnitVec();
         // Bounce
         return 0.5 *
                rayColor<T>(Ray<T>(rec.p, target - rec.p), world, depth - 1);
@@ -36,7 +36,7 @@ int main() {
 
     // Image.
     const auto aspectRatio = 16.0 / 9.0;
-    const int width = 512;
+    const int width = 1024;
     const int height = static_cast<int>(width / aspectRatio);
     const int samplesPerPixel = 100;
     const int maxDepth = 50;

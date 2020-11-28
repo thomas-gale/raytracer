@@ -95,6 +95,11 @@ template <class T> class Vec3 {
         }
     }
 
+    // For true Lambertian reflection.
+    inline static Vec3 randomUnitVec() {
+        return unit(randomInUnitSphere());
+    }
+
   private:
     T e[3];
 };
