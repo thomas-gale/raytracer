@@ -82,11 +82,11 @@ template <class T> class Vec3 {
     // Stochasitic Utility
     inline static Vec3 random(T min = 0.0, T max = 1.0) {
         return Vec3<T>(randomReal<T>(min, max), randomReal<T>(min, max),
-                   randomReal<T>(min, max));
+                       randomReal<T>(min, max));
     }
 
+    // Simple random sample in unit cube, reject untill within sphere
     inline static Vec3 randomInUnitSphere() {
-        // Simple random sample in unit cube, reject untill within sphere
         while (true) {
             auto p = Vec3<T>::random(-1, 1);
             if (p.lengthSquared() >= 1)
@@ -96,8 +96,17 @@ template <class T> class Vec3 {
     }
 
     // For true Lambertian reflection.
-    inline static Vec3 randomUnitVec() {
-        return unit(randomInUnitSphere());
+    inline static Vec3 randomUnitVec() { return unit(randomInUnitSphere()); }
+
+    // Alternative diffuse formulation
+    inline static Vec3 randomInHemisphere(const Vec3& normal) {
+        Vec3 inUnitSphere = randomInUnitSphere();
+        if (dot(inUnitSphere, normal) >
+            0.0) { // If in the same hemisphere as the normal.
+            return inUnitSphere;
+        } else {
+            return -inUnitSphere;
+        }
     }
 
   private:

@@ -22,6 +22,7 @@ Color<T> rayColor(const Ray<T>& r, const Hittable<T>& world, int depth) {
 
     if (world.hit(r, 0.001, infinity, rec)) {
         Point3<T> target = rec.p + rec.normal + Vec3<T>::randomUnitVec();
+        //Point3<T> target = rec.p + Vec3<T>::randomInHemisphere(rec.normal);
         // Bounce
         return 0.5 *
                rayColor<T>(Ray<T>(rec.p, target - rec.p), world, depth - 1);
