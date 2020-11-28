@@ -67,11 +67,20 @@ template <class T> class Dielectric : public Material<T> {
                          Ray<T>& scattered) const override {
         attenuation = Color<T>(1, 1, 1);
         T refractionRatio = rec.frontFace ? (1.0 / ir) : ir;
-
         Vec3<T> unitDir = unit(rIn.direction());
-        Vec3<T> refracted = refract(unitDir, rec.normal, refractionRatio);
+        
+        T cosTheta = std::min<T>(dot(-unitDir, rec.normal), 1.0);
+        T sinTheta = std::sqrt(1.0 - cosTheta*cosTheta);
 
-        scattered = Ray<T>(rec.p, refracted);
+        bool cannotRefract = refractionRatio * sinTheta > 1.0;
+        Vec3<T> direction;
+
+        if (cannotRefract)
+          direction = reflect(unitDir, rec.normal);
+        else 
+          direction = refract(unitDir, rec.normal, refractionRatio);
+
+        scattered = Ray<T>(rec.p, direction);
         return true;
     }
 
