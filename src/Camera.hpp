@@ -13,11 +13,11 @@ template <class T> class Camera {
         auto viewportWidth = aspectRatio * viewportHeight;
         auto focalLength = 1.0;
 
-        origin = Point3<double>(0.0, 0.0, 0.0);
-        horizontal = Vec3<double>(viewportWidth, 0.0, 0.0);
-        vertical = Vec3<double>(0.0, viewportHeight, 0.0);
+        origin = Point3<T>(0.0, 0.0, 0.0);
+        horizontal = Vec3<T>(viewportWidth, 0.0, 0.0);
+        vertical = Vec3<T>(0.0, viewportHeight, 0.0);
         lowerLeftCorner = origin - horizontal / 2 - vertical / 2 -
-                          Vec3<double>(0.0, 0.0, focalLength);
+                          Vec3<T>(0.0, 0.0, focalLength);
     }
 
     Ray<T> getRay(T u, T v) const {

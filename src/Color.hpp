@@ -17,11 +17,11 @@ uint32_t convertRGBA(const Color<T>& pixelColor, int samplesPerPixel) {
     g = std::sqrt(scale * g);
     b = std::sqrt(scale * b);
 
-    uint32_t c = static_cast<uint8_t>(255.999 * clamp(r, 0.0, 0.999));
+    uint32_t c = static_cast<uint8_t>(255.999 * clamp<T>(r, 0.0, 0.999));
     c <<= 8;
-    c |= static_cast<uint8_t>(255.999 * clamp(g, 0.0, 0.999));
+    c |= static_cast<uint8_t>(255.999 * clamp<T>(g, 0.0, 0.999));
     c <<= 8;
-    c |= static_cast<uint8_t>(255.999 * clamp(b, 0.0, 0.999));
+    c |= static_cast<uint8_t>(255.999 * clamp<T>(b, 0.0, 0.999));
     c <<= 8;
     return c;
 }
