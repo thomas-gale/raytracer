@@ -79,6 +79,22 @@ template <class T> class Vec3 {
 
     inline friend Vec3 unit(Vec3 v) { return v / v.length(); }
 
+    // Stochasitic Utility
+    inline static Vec3 random(T min = 0.0, T max = 1.0) {
+        return Vec3<T>(randomReal<T>(min, max), randomReal<T>(min, max),
+                   randomReal<T>(min, max));
+    }
+
+    inline static Vec3 randomInUnitSphere() {
+        // Simple random sample in unit cube, reject untill within sphere
+        while (true) {
+            auto p = Vec3<T>::random(-1, 1);
+            if (p.lengthSquared() >= 1)
+                continue; // Not in sphere.
+            return p;
+        }
+    }
+
   private:
     T e[3];
 };

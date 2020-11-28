@@ -13,10 +13,18 @@
 using namespace raytrace;
 
 template <class T>
-Color<T> rayColor(const Ray<T>& r, const Hittable<T>& world) {
+Color<T> rayColor(const Ray<T>& r, const Hittable<T>& world, int depth) {
     HitRecord<T> rec;
+
+    // Limit ray bounce
+    if (depth <= 0)
+        return Color<T>(0, 0, 0);
+
     if (world.hit(r, 0, infinity, rec)) {
-        return 0.5 * (rec.normal + Color<T>(1, 1, 1));
+        Point3<T> target = rec.p + rec.normal + Vec3<T>::randomInUnitSphere();
+        // Bounce
+        return 0.5 *
+               rayColor<T>(Ray<T>(rec.p, target - rec.p), world, depth - 1);
     }
     Vec3<T> unitDirection = unit(r.direction());
     auto t = 0.5 * (unitDirection.y() + 1.0);
@@ -31,6 +39,7 @@ int main() {
     const int width = 512;
     const int height = static_cast<int>(width / aspectRatio);
     const int samplesPerPixel = 16;
+    const int maxDepth = 50;
 
     // World.
     HittableList<double> world;
@@ -54,7 +63,7 @@ int main() {
                 auto u = (double(x) + randomReal<double>()) / (width - 1);
                 auto v = (double(y) + randomReal<double>()) / (height - 1);
                 Ray<double> r = cam.getRay(u, v);
-                pixelColor += rayColor(r, world);
+                pixelColor += rayColor(r, world, maxDepth);
             }
             line[x] = Pixel<double>(Point2<int>(x, y), pixelColor);
         }
