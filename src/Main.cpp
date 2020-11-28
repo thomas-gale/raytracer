@@ -38,7 +38,7 @@ int main() {
     const auto aspectRatio = 16.0 / 9.0;
     const int width = 512;
     const int height = static_cast<int>(width / aspectRatio);
-    const int samplesPerPixel = 16;
+    const int samplesPerPixel = 100;
     const int maxDepth = 50;
 
     // World.
