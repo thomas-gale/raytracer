@@ -54,8 +54,10 @@ int main() {
         std::make_shared<Lambertian<real>>(Color<real>(0.8, 0.8, 0));
     auto matCenter =
         std::make_shared<Lambertian<real>>(Color<real>(0.7, 0.3, 0.3));
-    auto matLeft = std::make_shared<Metal<real>>(Color<real>(0.8, 0.8, 0.8));
-    auto matRight = std::make_shared<Metal<real>>(Color<real>(0.8, 0.6, 0.2));
+    auto matLeft =
+        std::make_shared<Metal<real>>(Color<real>(0.8, 0.8, 0.8), 0.3);
+    auto matRight =
+        std::make_shared<Metal<real>>(Color<real>(0.8, 0.6, 0.2), 1.0);
 
     world.add(
         std::make_shared<Sphere<real>>(Point3<real>(0, -100.5, -1), 100,

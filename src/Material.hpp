@@ -40,20 +40,21 @@ template <class T> class Lambertian : public Material<T> {
 // Metal (reflective) material
 template <class T> class Metal : public Material<T> {
   public:
-    Metal(const Color<T>& a) : albedo(a) {}
+    Metal(const Color<T>& a, T f) : albedo(a), fuzz(f < 1 ? f : 1) {}
 
     virtual bool scatter(const Ray<T>& rIn, const HitRecord<T>& rec,
                          Color<T>& attenuation,
                          Ray<T>& scattered) const override {
         Vec3<T> reflected = reflect(unit(rIn.direction()), rec.normal);
-
-        scattered = Ray<T>(rec.p, reflected);
+        scattered =
+            Ray<T>(rec.p, reflected + fuzz * Vec3<T>::randomInUnitSphere());
         attenuation = albedo;
         return dot(scattered.direction(), rec.normal) > 0;
     }
 
   private:
     Color<T> albedo;
+    T fuzz;
 };
 
 } // namespace raytrace
